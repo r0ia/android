@@ -9,6 +9,7 @@ import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.widget.TextView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -29,16 +30,17 @@ public class PuckActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final TextView mTextView = (TextView)findViewById(R.id.puckTextView);
+        final TextView mTextView = (TextView) findViewById(R.id.puckTextView);
+        final TextView mSiteTextView = (TextView) findViewById(R.id.puckSiteTextView);
         mTextView.setText("Calling api...");
         Intent intent = getIntent();
         String action = intent.getAction();
         Uri data = intent.getData();
 
-        if (data != null) handleNfc(mTextView, data);
+        if (data != null) handleNfc(mTextView, mSiteTextView, data);
     }
 
-    private void handleNfc(final TextView mTextView, Uri data) {
+    private void handleNfc(final TextView mTextView, final TextView mSiteTextView, Uri data) {
         String site = data.getQueryParameter("site");
         //Log.d("TEST", site);
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -46,7 +48,7 @@ public class PuckActivity extends AppCompatActivity {
         TelephonyManager mngr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         String deviceId = mngr.getDeviceId();
         String url = site + "api/devices/" + deviceId;
-
+        mSiteTextView.setText(url);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -60,6 +62,11 @@ public class PuckActivity extends AppCompatActivity {
             }
         });
 // Add the request to the RequestQueue.
+
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(
+                30000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue.add(stringRequest);
     }
 }
