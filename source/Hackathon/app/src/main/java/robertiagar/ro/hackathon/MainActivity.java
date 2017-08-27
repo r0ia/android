@@ -58,11 +58,7 @@ public class MainActivity extends AppCompatActivity {
         String deviceId = mngr.getDeviceId();
         mIMEIView.setText(deviceId);
 
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        Uri data = intent.getData();
 
-        if (data != null) handleNfc(null, null, data);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -136,39 +132,7 @@ public class MainActivity extends AppCompatActivity {
         queue.add(jsonObjectRequest);
     }
 
-    private void handleNfc(final TextView mTextView, final NetworkImageView mImageView, Uri data) {
-        String site = data.getQueryParameter("site");
-        //Log.d("TEST", site);
-        RequestQueue queue = Volley.newRequestQueue(this);
-        // Request a string response from the provided URL.
 
-        String term = "term=" + site.replace(" ", "+") + "&entity=podcast";
-        String url = "https://itunes.apple.com/search?" + term;
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        mTextView.setText("Response is: " + response);
-                        try {
-                            JSONObject obj = new JSONObject(response);
-                            String imageUrl = obj.getJSONArray("results").getJSONObject(0).getString("artworkUrl100");
-
-                            mImageView.setImageURI(Uri.parse(imageUrl));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                mTextView.setText("That didn't work!");
-            }
-        });
-// Add the request to the RequestQueue.
-        queue.add(stringRequest);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
